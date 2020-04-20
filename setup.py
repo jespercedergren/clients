@@ -6,5 +6,6 @@ setup(
    author='Jesper Cedergren',
    author_email='jesper.cedergren@hotmail.com',
    packages=['clients'],  #same as name
-   install_requires=['s3fs', 'fastparquet', 'toolz', 'dask', 'pyarrow'] #external packages as dependencies
+   install_requires=['s3fs==0.4.2', 'fastparquet==0.3.3', 'toolz==0.10.0', 'dask==2.14.0', 'pyarrow==0.16.0']
+   #external packages as dependencies
 )
