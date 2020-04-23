@@ -37,5 +37,8 @@ services:
             - MINIO_SECRET_KEY=testtest
     command: server /export
 
-
-
+ dynamodb:
+     image: amazon/dynamodb-local
+     ports:
+         - "8000:8000"
+     command: ["-jar", "DynamoDBLocal.jar"]

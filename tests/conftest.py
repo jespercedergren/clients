@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 from tests.server.setup.postgres import PostgresSetup
 from tests.server.setup.mongo import MongoDBSetup
 from clients.mongo import get_client_arg_from_secrets
-from tests.config import minio_config, localstack_config, mongo_config, postgres_config
+from tests.config import minio_config, localstack_config, dynamodb_config, mongo_config, postgres_config
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -140,6 +140,20 @@ def setup_s3_bucket_minio():
         for key in bucket.objects.iterator():
             key.delete()
         bucket.delete()
+
+
+@pytest.fixture(scope="session")
+def setup_table_dynamodb():
+
+    #try:
+    dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
+    dynamodb_client.create_table(**dynamodb_config["table"])
+    #except dynamodb_client.exceptions.ResourceInUseException as e:
+    #    print(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
+
+    yield dynamodb_client
+
+    dynamodb_client.delete_table(TableName=dynamodb_config['table']['TableName'])
 
 
 @pytest.fixture(scope="session")
