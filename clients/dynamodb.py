@@ -114,6 +114,9 @@ dynamodb_to_python_conversion_map = {"S": str, "N": float, "B": noop, "BOOL": bo
                                      "SS": list_item_to_list, "NS": list_item_to_list, "BS": list_item_to_list}
 
 
+from encoders.dynamodb import DynamoDBItemEncoder
+
+
 class DynamoDBClientBase(BaseClient):
     """
     Base class for an FirehoseClient that gets the secrets from AWS Secrets Manager.
@@ -146,6 +149,7 @@ class DynamoDBClient(DynamoDBClientBase):
         :return:
         """
         item = json_to_item(item_json=item_json, key_schema=key_schema)
+        #item = DynamoDBItemEncoder.from_json(item_json=item, key_schema=key_schema)
         response = self.client.put_item(TableName=self.table_name, Item=item)
         return response
 
@@ -157,8 +161,10 @@ class DynamoDBClient(DynamoDBClientBase):
         :return:
         """
         key = json_to_item(item_json=item_key, key_schema=key_schema)
+        #key = DynamoDBItemEncoder.from_json(item_json=item, key_schema=key_schema)
         item = self.client.get_item(TableName=self.table_name, Key=key, ConsistentRead=consistent_read)["Item"]
         item_json = item_to_json(item)
+        #item_json = DynamoDBItemEncoder.from_item(item=item)
         return item_json
 
 
