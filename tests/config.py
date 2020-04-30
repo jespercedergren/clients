@@ -96,7 +96,7 @@ postgres_config = \
     'dbname': 'test',
     'user': 'test',
     'password': 'test',
-    'port': '54320'
+    'port': '5432'
 }
 }
 

@@ -1,9 +1,0 @@
-pymongo
-aiohttp
-requests
-s3fs
-toolz
-dask
-fastparquet
-pyarrow
-python-snappy

@@ -114,7 +114,7 @@ dynamodb_to_python_conversion_map = {"S": str, "N": float, "B": noop, "BOOL": bo
                                      "SS": list_item_to_list, "NS": list_item_to_list, "BS": list_item_to_list}
 
 
-from encoders.dynamodb import DynamoDBItemEncoder
+#from encoders.dynamodb import DynamoDBItemEncoder
 
 
 class DynamoDBClientBase(BaseClient):

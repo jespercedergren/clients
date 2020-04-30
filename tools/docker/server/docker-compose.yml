@@ -42,3 +42,10 @@ services:
      ports:
          - "8000:8000"
      command: ["-jar", "DynamoDBLocal.jar"]
+
+ postgres:
+  image: postgres:12
+  env_file:
+    - .env_file
+  ports:
+    - "5432:5432"
