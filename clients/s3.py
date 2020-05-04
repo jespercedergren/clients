@@ -105,3 +105,45 @@ class S3ParquetClient(S3ClientBase):
 
         return pf_pd.to_dict(orient="list")
 
+
+class DaskS3(S3ClientBase):
+
+    def __init__(self, aws_profile=None):
+        super(DaskS3, self).__init__(aws_profile=aws_profile)
+        self.client_kwargs = self.get_client_kwargs(self._get_secrets())
+        self.fs = s3fs.core.S3FileSystem(**self.client_kwargs)
+
+    @staticmethod
+    def get_client_kwargs(secrets):
+        client_kwargs = secrets.copy()
+
+        kwargs = {}
+
+        for client_key, secret_key in zip(["key", "secret"], ["aws_access_key_id", "aws_secret_access_key"]):
+            try:
+                kwargs[client_key] = client_kwargs.pop(secret_key)
+            except KeyError as e:
+                pass
+
+        kwargs["client_kwargs"] = client_kwargs
+
+        return kwargs
+
+    def read_parquet(self, path, engine="pyarrow"):
+
+        input_parquet_path = f"{path}/part*.parquet"
+        all_paths = self.fs.glob(path=input_parquet_path)
+        all_paths_s3 = ["s3://" + x for x in all_paths]
+
+        df_dask = dd.read_parquet(path=all_paths_s3, engine=engine, storage_options=self.client_kwargs,
+                                  gather_stats=False)
+        return df_dask
+
+    def read_json(self, path):
+        all_paths = self.fs.glob(path=path)
+        all_paths_s3 = ["s3://" + x for x in all_paths]
+
+        return dd.read_json(url_path=all_paths_s3, storage_options=self.client_kwargs)
+
+    def save_parquet(self, df_dask, outfile, engine="pyarrow"):
+        dd.to_parquet(df_dask, path=outfile, engine=engine, storage_options=self.client_kwargs)
