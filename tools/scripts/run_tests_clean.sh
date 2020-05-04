@@ -7,6 +7,8 @@ test_arg=$1
 ./tools/scripts/spin_up.sh
 
 test_folder="$(pwd)/tests"
+clients_folder="$(pwd)/clients"
+encoders_folder="$(pwd)/encoders"
 
 if [ "$test_arg" == "" ] ; then
   echo "Running unit and integration tests."
