@@ -1,8 +1,10 @@
-import boto3
 import json
-from tests.server.setup.mongo import MongoDBSetup
+
+import boto3
 from clients.mongo import get_client_arg_from_secrets
-from tests.config import localstack_config, minio_config, mongo_config
+
+from tests.config import dynamodb_config, localstack_config, minio_config, mongo_config
+from tests.setup.mongo import MongoDBSetup
 
 
 def setup_secrets_localstack():
@@ -47,32 +49,31 @@ def setup_firehose_delivery_stream_localstack():
     s3_destination_configuration = {"RoleARN": role_arn, "BucketARN": bucket_arn, "Prefix": prefix}
 
     extended_s3_destination_config = {
-        'RoleARN': role_arn,
-        'BucketARN': bucket_arn,
-        'DataFormatConversionConfiguration': {
-            'InputFormatConfiguration': {
-                'Deserializer': {
-                    'HiveJsonSerDe': {
-                    }
-                }
-            },
-            'OutputFormatConfiguration': {
-                'Serializer': {
-                    'ParquetSerDe': {
-                    }
-                }
-            },
-            'SchemaConfiguration': {
-            },
-            'Enabled': True
-        }
+        "RoleARN": role_arn,
+        "BucketARN": bucket_arn,
+        "DataFormatConversionConfiguration": {
+            "InputFormatConfiguration": {"Deserializer": {"HiveJsonSerDe": {}}},
+            "OutputFormatConfiguration": {"Serializer": {"ParquetSerDe": {}}},
+            "SchemaConfiguration": {},
+            "Enabled": True,
+        },
     }
 
-    stream_setup = {"DeliveryStreamName": delivery_stream_name,
-                    "S3DestinationConfiguration": s3_destination_configuration,
-                    "ExtendedS3DestinationConfiguration": extended_s3_destination_config}
+    stream_setup = {
+        "DeliveryStreamName": delivery_stream_name,
+        "S3DestinationConfiguration": s3_destination_configuration,
+        "ExtendedS3DestinationConfiguration": extended_s3_destination_config,
+    }
 
     firehose_client.create_delivery_stream(**stream_setup)
+
+
+def setup_table_dynamodb():
+    try:
+        dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
+        dynamodb_client.create_table(**dynamodb_config["table"])
+    except dynamodb_client.exceptions.ResourceInUseException as e:
+        print(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
 
 
 def setup_s3_bucket_minio():
@@ -112,4 +113,5 @@ if __name__ == "__main__":
     setup_s3_bucket_localstack()
     setup_s3_bucket_minio()
     setup_firehose_delivery_stream_localstack()
+    setup_table_dynamodb()
     clean_mongo_database(mongo_db_setup())

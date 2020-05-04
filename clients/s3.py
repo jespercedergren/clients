@@ -38,10 +38,10 @@ class S3Client(S3ClientBase):
         self.resource = boto3.resource("s3", **self._get_secrets())
         self.bucket = bucket
 
-    def upload_record(self, record: bytes, get_key_func, prefix=None):
+    def upload_record(self, record: bytes, get_key_func, prefix=None, **kwargs):
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            key = get_key_func(**locals())
+            key = get_key_func(**locals(), **kwargs)
             local_file = f"{temp_dir}/temp_file"
 
             with open(local_file, "wb") as f:
@@ -89,10 +89,7 @@ class S3ParquetClient(S3ClientBase):
             return df_pandas.to_dict(orient="list")
 
         except Exception as e:
-            error = {i: value for i, value in enumerate(all_paths_s3)}
-            print(e)
-            #error["ERROR"] = str(e.args[0])
-            return error
+            raise e
 
     def read_fastparquet(self, path):
 
