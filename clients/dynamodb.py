@@ -167,6 +167,11 @@ class DynamoDBClient(DynamoDBClientBase):
         item_json = item_to_json(item)
         return item_json
 
+    def scan(self, consistent_read: bool = False):
+        items = self.client.scan(TableName=self.table_name, ConsistentRead=consistent_read)["Items"]
+        items_json = [item_to_json(item) for item in items]
+        return items_json
+
 
 item_format = {
         'string': {
