@@ -1,6 +1,7 @@
 import boto3
 from clients.base import BaseClient
 from clients.secrets_manager import SecretsManager
+import numpy as np
 
 
 # INSERT
@@ -54,11 +55,10 @@ def json_to_item(item_json: dict, key_schema: dict = None):
         return {key: {python_to_dynamodb_type_map[type(value)]: python_to_dynamodb_conversion_map[type(value)](value)}
                 for key, value in item_json.items()}
 
-
 python_to_dynamodb_conversion_map = {str: noop, float: str, int: str, type(b''): noop, bool: noop,
                                      type(None): set_none_true,
-                                     type([]): get_list_attribute, type({}): get_map_attribute}
-
+                                     type([]): get_list_attribute, type({}): get_map_attribute,
+                                     type(np.array([])): get_list_attribute}
 
 # READ
 def list_item_to_list(attribute_value: list):
