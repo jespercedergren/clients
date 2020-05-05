@@ -6,7 +6,7 @@ import numpy as np
 
 # INSERT
 python_to_dynamodb_type_map = {str: "S", int: "N", float: "N", type(b''): "B", bool: "BOOL", type(None): "NULL",
-                               type([]): "L", type({}): "M"}
+                               type([]): "L", type(np.array([])): "L", type({}): "M"}
 extra = {"StringSet": "SS", "NumberSet": "NS", "BinarySet": "BS"}
 
 
@@ -54,6 +54,7 @@ def json_to_item(item_json: dict, key_schema: dict = None):
     else:
         return {key: {python_to_dynamodb_type_map[type(value)]: python_to_dynamodb_conversion_map[type(value)](value)}
                 for key, value in item_json.items()}
+
 
 python_to_dynamodb_conversion_map = {str: noop, float: str, int: str, type(b''): noop, bool: noop,
                                      type(None): set_none_true,
