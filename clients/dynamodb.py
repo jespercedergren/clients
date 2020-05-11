@@ -1,11 +1,12 @@
 import boto3
 from clients.base import BaseClient
 from clients.secrets_manager import SecretsManager
+import numpy as np
 
 
 # INSERT
 python_to_dynamodb_type_map = {str: "S", int: "N", float: "N", type(b''): "B", bool: "BOOL", type(None): "NULL",
-                               type([]): "L", type({}): "M"}
+                               type([]): "L", type(np.array([])): "L", type({}): "M"}
 extra = {"StringSet": "SS", "NumberSet": "NS", "BinarySet": "BS"}
 
 
@@ -57,8 +58,8 @@ def json_to_item(item_json: dict, key_schema: dict = None):
 
 python_to_dynamodb_conversion_map = {str: noop, float: str, int: str, type(b''): noop, bool: noop,
                                      type(None): set_none_true,
-                                     type([]): get_list_attribute, type({}): get_map_attribute}
-
+                                     type([]): get_list_attribute, type({}): get_map_attribute,
+                                     type(np.array([])): get_list_attribute}
 
 # READ
 def list_item_to_list(attribute_value: list):
@@ -165,6 +166,11 @@ class DynamoDBClient(DynamoDBClientBase):
         item = self.client.get_item(TableName=self.table_name, Key=key, ConsistentRead=consistent_read)["Item"]
         item_json = item_to_json(item)
         return item_json
+
+    def scan(self, consistent_read: bool = False):
+        items = self.client.scan(TableName=self.table_name, ConsistentRead=consistent_read)["Items"]
+        items_json = [item_to_json(item) for item in items]
+        return items_json
 
 
 item_format = {

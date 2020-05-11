@@ -69,3 +69,20 @@ class TestDynamoDBRead:
         assert expected_3 == response_3
         assert expected_4 == response_4
         assert expected_5 == response_5
+
+    def test_dynamodb_scan(self, add_data):
+
+        expected_1 = add_data[0]
+        expected_2 = add_data[1]
+        expected_3 = add_data[2]
+        expected_4 = add_data[3]
+        expected_5 = add_data[4]
+        expected = [expected_1, expected_2, expected_3, expected_4, expected_5]
+
+        dynamodb_client = PatchedDynamoDBClient()
+
+        response = dynamodb_client.scan()
+
+        indicators = [x in expected for x in response]
+        check = sum(indicators) == len(expected)
+        assert check
