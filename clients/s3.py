@@ -20,7 +20,7 @@ def get_firehose_output_s3_key(prefix="test-prefix", delivery_stream_name="api_t
 
 class S3ClientBase(BaseClient):
 
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         """
         Gets secrets from the secrets manager as json with keys:
          - host, port, region_name, aws_access_key_id, aws_secret_access_key
@@ -33,8 +33,8 @@ class S3ClientBase(BaseClient):
 
 class S3Client(S3ClientBase):
 
-    def __init__(self, bucket, aws_profile=None):
-        super(S3Client, self).__init__(aws_profile=aws_profile)
+    def __init__(self, bucket, aws_profile=None, secrets=None):
+        super(S3Client, self).__init__(aws_profile=aws_profile, secrets=secrets)
         self.resource = boto3.resource("s3", **self._get_secrets())
         self.bucket = bucket
 
@@ -55,8 +55,8 @@ class S3Client(S3ClientBase):
 
 class S3ParquetClient(S3ClientBase):
 
-    def __init__(self, aws_profile=None):
-        super(S3ParquetClient, self).__init__(aws_profile=aws_profile)
+    def __init__(self, aws_profile=None, secrets=None):
+        super(S3ParquetClient, self).__init__(aws_profile=aws_profile, secrets=secrets)
         self.client_kwargs = self.get_client_kwargs(self._get_secrets())
         self.fs = s3fs.core.S3FileSystem(**self.client_kwargs)
 
@@ -108,8 +108,8 @@ class S3ParquetClient(S3ClientBase):
 
 class DaskS3(S3ClientBase):
 
-    def __init__(self, aws_profile=None):
-        super(DaskS3, self).__init__(aws_profile=aws_profile)
+    def __init__(self, aws_profile=None, secrets=None):
+        super(DaskS3, self).__init__(aws_profile=aws_profile, secrets=secrets)
         self.client_kwargs = self.get_client_kwargs(self._get_secrets())
         self.fs = s3fs.core.S3FileSystem(**self.client_kwargs)
 

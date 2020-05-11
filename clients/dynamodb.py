@@ -124,7 +124,7 @@ class DynamoDBClientBase(BaseClient):
     """
     Base class for an FirehoseClient that gets the secrets from AWS Secrets Manager.
     """
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         """
         Gets secrets from the secrets manager as json with keys:
          - host, user, password, port
@@ -140,8 +140,8 @@ class DynamoDBClient(DynamoDBClientBase):
     Requires delivery_stream as input when instantiated.
     """
 
-    def __init__(self, table_name, aws_profile=None):
-        super(DynamoDBClient, self).__init__(aws_profile=aws_profile)
+    def __init__(self, table_name, aws_profile=None, secrets=None):
+        super(DynamoDBClient, self).__init__(aws_profile=aws_profile, secrets=secrets)
         self.client = boto3.client("dynamodb", **self._get_secrets())
         self.table_name = table_name
 

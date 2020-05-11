@@ -44,8 +44,8 @@ class SecretsManager(SecretsManagerClientBase):
     variable environment.
     """
 
-    def __init__(self):
-        super(SecretsManager, self).__init__()
+    def __init__(self, secrets=None):
+        super(SecretsManager, self).__init__(secrets=secrets)
         self.client = boto3.client("secretsmanager", **self._get_secrets())
 
     def get_secrets(self, secret_id):

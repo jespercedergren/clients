@@ -17,7 +17,7 @@ class MongoDBClientBase(BaseClient):
     """
     Base class for an MongoClient that gets the secrets from AWS Secrets Manager.
     """
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         """
         Gets secrets from the secrets manager as json with keys:
          - host, user, password, port
@@ -48,8 +48,8 @@ class MongoDBClient(MongoDBClientBase):
     Class that implements methods the find and save on MongoDB database collections using the ContextManager MongoDBConnectionManager.
     Requires database and collection as input when instantiated.
     """
-    def __init__(self, database, collection):
-        super(MongoDBClient, self).__init__()
+    def __init__(self, database, collection, secrets=None):
+        super(MongoDBClient, self).__init__(secrets=secrets)
         self.database = database
         self.collection = collection
 
