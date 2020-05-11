@@ -9,16 +9,18 @@ class BaseClient(ABC):
     AWS profile is set at runtime if specified. This allows for patching the derived child classes from this base class
     for test purposes.
     """
-    def __init__(self, aws_profile=None):
+    def __init__(self, aws_profile=None, secrets=None, **kwargs):
 
         if aws_profile:
             os.environ['AWS_PROFILE'] = aws_profile
 
-        self.secrets = None
-        self._set_secrets()
+        if secrets:
+            self.secrets = secrets
+        else:
+            self._set_secrets(**kwargs)
 
     @abstractmethod
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         """
         Needs to be implemented by a child class to set required secrets to self.secrets
         """

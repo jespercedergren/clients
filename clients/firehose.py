@@ -7,7 +7,7 @@ class FirehoseClientBase(BaseClient):
     """
     Base class for an FirehoseClient that gets the secrets from AWS Secrets Manager.
     """
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         """
         Gets secrets from the secrets manager as json with keys:
          - host, user, password, port
@@ -23,8 +23,8 @@ class FirehoseClient(FirehoseClientBase):
     Requires delivery_stream as input when instantiated.
     """
 
-    def __init__(self, delivery_stream_name, aws_profile=None):
-        super(FirehoseClient, self).__init__(aws_profile=aws_profile)
+    def __init__(self, delivery_stream_name, aws_profile=None, secrets=None):
+        super(FirehoseClient, self).__init__(aws_profile=aws_profile, secrets=secrets)
         self.delivery_stream_name = delivery_stream_name
         self.client = boto3.client("firehose", **self._get_secrets())
 

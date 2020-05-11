@@ -14,83 +14,66 @@ class WrongDatabase(Exception):
 class PatchedFirehoseClient(FirehoseClient):
     """
     Class that patches the FirehoseClient for testing.
-    The _set_secrets method is overridden and sets the secrets with a set of fixed credentials.
     These credentials match the ones specified in conftest.py.
     """
     def __init__(self):
         super(PatchedFirehoseClient, self).__init__(
-            delivery_stream_name='api_to_s3_ingest')
-
-    def _set_secrets(self):
-        secrets = {
-            "endpoint_url": endpoint_url_localstack,
-            "region_name": "eu-west-1",
-            "aws_access_key_id": "test",
-            "aws_secret_access_key": "test"
-        }
-
-        self.secrets = secrets
+            delivery_stream_name='api_to_s3_ingest',
+            secrets={
+                "endpoint_url": endpoint_url_localstack,
+                "region_name": "eu-west-1",
+                "aws_access_key_id": "test",
+                "aws_secret_access_key": "test"
+            }
+        )
 
 
 class PatchedS3Client(S3Client):
     """
     Class that patches the S3Client for testing.
-    The _set_secrets method is overridden and sets the secrets with a set of fixed credentials.
     These credentials match the ones specified in conftest.py.
     """
     def __init__(self):
         super(PatchedS3Client, self).__init__(
-            bucket="test-bucket")
-
-    def _set_secrets(self):
-        secrets = {
-            "endpoint_url": endpoint_url_minio,
-            "region_name": "eu-west-1",
-            "aws_access_key_id": "testtest",
-            "aws_secret_access_key": "testtest"
-        }
-
-        self.secrets = secrets
+            bucket="test-bucket",
+            secrets={
+                        "endpoint_url": endpoint_url_minio,
+                        "region_name": "eu-west-1",
+                        "aws_access_key_id": "testtest",
+                        "aws_secret_access_key": "testtest"
+                    }
+        )
 
 
 class PatchedS3ParquetClient(S3ParquetClient):
     """
     Class that patches the S3ParquetClient for testing.
-    The _set_secrets method is overridden and sets the secrets with a set of fixed credentials.
     These credentials match the ones specified in conftest.py.
     """
     def __init__(self):
-        super(PatchedS3ParquetClient, self).__init__()
-
-    def _set_secrets(self):
-        secrets = {
+        super(PatchedS3ParquetClient, self).__init__(
+            secrets={
             "endpoint_url": endpoint_url_minio,
             "region_name": "eu-west-1",
             "aws_access_key_id": "testtest",
             "aws_secret_access_key": "testtest"
-        }
-
-        self.secrets = secrets
+        })
 
 
 class PatchedDynamoDBClient(DynamoDBClient):
     """
     Class that patches the DynamoDBClient for testing.
-    The _set_secrets method is overridden and sets the secrets with a set of fixed credentials.
     These credentials match the ones specified in conftest.py.
     """
     def __init__(self):
-        super(PatchedDynamoDBClient, self).__init__(table_name="user_table")
-
-    def _set_secrets(self):
-        secrets = {
-            "endpoint_url": endpoint_url_dynamodb,
-            "region_name": "eu-west-1",
-            "aws_access_key_id": "test",
-            "aws_secret_access_key": "test"
-        }
-
-        self.secrets = secrets
+        super(PatchedDynamoDBClient, self).__init__(table_name="user_table",
+                                                    secrets={
+                                                                "endpoint_url": endpoint_url_dynamodb,
+                                                                "region_name": "eu-west-1",
+                                                                "aws_access_key_id": "test",
+                                                                "aws_secret_access_key": "test"
+                                                            }
+                                                    )
 
 
 class PatchedMongoDBClient(MongoDBClient):
@@ -104,7 +87,7 @@ class PatchedMongoDBClient(MongoDBClient):
             database='test',
             collection='test')
 
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         secrets = {
             'host': host_mongo,
             'user': 'test',
@@ -129,15 +112,12 @@ class PatchedPostgresClient(PostgresClient):
     These credentials match the ones specified in conftest.py.
     """
     def __init__(self):
-        super(PatchedPostgresClient, self).__init__()
+        super(PatchedPostgresClient, self).__init__(secrets={
+                                                            'host': host_postgres,
+                                                            'dbname': 'test',
+                                                            'user': 'test',
+                                                            'password': 'test',
+                                                            'port': '5432'
+                                                        })
         if self._get_secrets()['dbname'] != 'test':
             raise WrongDatabase('Not connected to test database')
-
-    def _set_secrets(self):
-        self.secrets = {
-            'host': host_postgres,
-            'dbname': 'test',
-            'user': 'test',
-            'password': 'test',
-            'port': '5432'
-        }

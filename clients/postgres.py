@@ -7,7 +7,7 @@ class PostgresClientBase(BaseClient):
     """
     Base class for a Postgres database that gets the secrets from AWS Secrets Manager.
     """
-    def _set_secrets(self):
+    def _set_secrets(self, **kwargs):
         """
         Gets secrets from the secrets manager as json with keys:
          - host, dbname, user, password, port
