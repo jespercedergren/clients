@@ -4,7 +4,11 @@ import uuid
 import tempfile
 import s3fs
 import dask.dataframe as dd
+from dask import delayed
+from pandas.io.json import json_normalize
 import fastparquet
+import json
+
 
 from clients.base import BaseClient
 from clients.secrets_manager import SecretsManager
@@ -112,6 +116,7 @@ class DaskS3(S3ClientBase):
         super(DaskS3, self).__init__(aws_profile=aws_profile, secrets=secrets)
         self.client_kwargs = self.get_client_kwargs(self._get_secrets())
         self.fs = s3fs.core.S3FileSystem(**self.client_kwargs)
+        self.s3_client = None
 
     @staticmethod
     def get_client_kwargs(secrets):
@@ -147,3 +152,12 @@ class DaskS3(S3ClientBase):
 
     def save_parquet(self, df_dask, outfile, engine="pyarrow"):
         dd.to_parquet(df_dask, path=outfile, engine=engine, storage_options=self.client_kwargs)
+
+    def read_json_normalized(self, path):
+        self.s3_client = boto3.client('s3', **self.secrets)
+        all_paths = self.fs.glob(path=path)
+        bucket_key_pairs = [file.split('/', maxsplit=1) for file in all_paths]
+        streaming_bodies = [self.s3_client.get_object(Bucket=bucket_key_pair[0], Key=bucket_key_pair[1])["Body"] for
+                            bucket_key_pair in bucket_key_pairs]
+        delayed_jsons = [delayed(json_normalize)(json.loads(body.read()), sep='_') for body in streaming_bodies]
+        return dd.from_delayed(delayed_jsons)
