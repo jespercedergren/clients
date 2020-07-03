@@ -161,3 +161,13 @@ class DaskS3(S3ClientBase):
                             bucket_key_pair in bucket_key_pairs]
         delayed_jsons = [delayed(json_normalize)(json.loads(body.read()), sep='_') for body in streaming_bodies]
         return dd.from_delayed(delayed_jsons)
+
+    def read_csv(self, path):
+        self.s3_client = boto3.client('s3', **self.secrets)
+        all_paths = self.fs.glob(path=path)
+        all_paths_s3 = ["s3://" + x for x in all_paths]
+        return dd.read_csv(url_path=all_paths_s3, storage_options=self.client_kwargs)
+
+
+def read_json_load_normalize(body):
+    return json_normalize(json.loads(body.read()), sep='_')
